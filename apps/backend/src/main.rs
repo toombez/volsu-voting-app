@@ -3,29 +3,28 @@ use axum::{
     http::StatusCode,
     Json, Router,
 };
+use backend::routers;
 use serde::{Deserialize, Serialize};
+
+use migration::{Migrator, MigratorTrait};
 
 #[tokio::main]
 async fn main() {
-    // // initialize tracing
-    // tracing_subscriber::fmt::init();
+    let connection = sea_orm
+        ::Database
+        ::connect("sqlite://./voting_app.sqlite?mode=rwc")
+        .await
+        .unwrap();
 
-    // build our application with a route
+    let _ = Migrator::up(&connection, None).await;
+
     let app = Router::new()
-        // `GET /` goes to `root`
-        .route("/", get(root))
-        // `POST /users` goes to `create_user`
-        .route("/users", post(create_user));
+        .merge(routers::create_router());
 
-    // run our app with hyper, listening globally on port 3000
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
 
-// basic handler that responds with a static string
-async fn root() -> &'static str {
-    "Hello, World!"
-}
 
 async fn create_user(
     // this argument tells axum to parse the request body
