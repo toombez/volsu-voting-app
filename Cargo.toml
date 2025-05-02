@@ -1,3 +1,9 @@
 [workspace]
 resolver = "2"
-members = ["apps/backend", "apps/frontend", "apps/tui-frontend"]
+members = [
+    "apps/backend",
+    "apps/frontend",
+    "apps/tui-frontend",
+
+    "crates/migration"
+]
