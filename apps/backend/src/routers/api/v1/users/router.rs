@@ -10,5 +10,6 @@ pub fn create_router() -> Router<AppState> {
             "/register",
             routing::post(handlers::register_user::register)
         )
+        .route("/", routing::get(handlers::get_users_list::get_users_list))
         .route("/{id}", routing::get(handlers::get_user_by_id::get_user_by_id))
 }
