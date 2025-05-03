@@ -19,6 +19,8 @@ migration = { path = "../../crates/migration" }
 entity = { path = "../../crates/entity" }
 uuid = { version = "1.16.0", features = ["v4"] }
 bcrypt = "0.17.0"
+jsonwebtoken = "9.3.1"
+chrono = "0.4.41"
 
 [dev-dependencies]
 cargo-watch = "8.5.3"
