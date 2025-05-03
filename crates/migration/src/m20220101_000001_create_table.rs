@@ -12,9 +12,13 @@ impl MigrationTrait for Migration {
                     .table(User::Table)
                     .if_not_exists()
                     .col(pk_uuid(User::Id))
-                    .col(string(User::Username))
+                    .col(string(User::Username).unique_key())
                     .col(string(User::Password))
-                    .col(string(User::Status))
+                    .col(ColumnDef
+                        ::new(User::Status)
+                        .null()
+                        .string()
+                    )
                     .to_owned()
             )
             .await
