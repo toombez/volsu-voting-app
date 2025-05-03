@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "cargo watch -x run"
+    "dev": "cargo watch -x run",
+    "generate:entity": "sea-orm-cli generate entity -u sqlite://./voting_app.sqlite -o entity/src --lib"
   },
   "keywords": [],
   "author": "",
