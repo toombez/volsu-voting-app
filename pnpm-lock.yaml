@@ -18,6 +18,8 @@ importers:
 
   apps/tui-frontend: {}
 
+  crates/entity: {}
+
 packages:
 
   turbo-darwin-64@2.5.2:

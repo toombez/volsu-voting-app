@@ -3,7 +3,8 @@ resolver = "2"
 members = [
     "apps/backend",
     "apps/frontend",
-    "apps/tui-frontend",
+    "apps/tui-frontend", "crates/entity",
 
-    "crates/migration"
+    "crates/migration",
+    "crates/entity"
 ]
