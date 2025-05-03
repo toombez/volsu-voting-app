@@ -11,6 +11,7 @@ use validator::Validate;
 
 use entity::user::{Entity as UserEntity, ActiveModel as UserActiveModel, Column as UserColumn, Model as UserModel};
 use sea_orm::{entity::*, query::*};
+use bcrypt::{hash, DEFAULT_COST};
 
 #[derive(Debug, Clone)]
 #[derive(Serialize, Deserialize)]
@@ -68,7 +69,7 @@ pub async fn register(
     };
 
     let user = UserActiveModel {
-        password: Set(payload.password.clone().to_string()),
+        password: Set(hash(payload.password.clone().to_string(), DEFAULT_COST).unwrap()),
         username: Set(payload.username.clone().to_string()),
         id: Set(Uuid::new_v4()),
         ..Default::default()
