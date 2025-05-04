@@ -1,4 +1,4 @@
-use axum::{http::Method, Router};
+use axum::{http::header, Router};
 use backend::{app_state::AppState, routers};
 use migration::{Migrator, MigratorTrait};
 use tower_http::cors::{Any, CorsLayer};
@@ -16,8 +16,10 @@ async fn main() {
     let app_state = AppState { connection };
 
     let cors = CorsLayer::new()
-        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::PATCH])
-        .allow_origin(Any);
+        // .allow_methods([Method::GET, Method::POST, Method::PUT, Method::PATCH])
+        .allow_origin(Any)
+        .allow_headers([header::CONTENT_TYPE])
+        .allow_credentials(false);
 
     let app = Router::new()
         .merge(routers::create_router(app_state.clone()))
