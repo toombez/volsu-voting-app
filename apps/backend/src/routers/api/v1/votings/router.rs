@@ -2,13 +2,14 @@ use axum::{middleware, routing, Router};
 
 use crate::{app_state::AppState, routers::api::v1::middleware::auth_only::auth_only_middleware};
 
-use super::handlers::create_voting::create_voting;
+use super::handlers;
 
 pub fn create_router(state: AppState) -> Router<AppState> {
     Router::new()
         .route(
             "/",
-            routing::post(create_voting)
+            routing::post(handlers::create_voting::create_voting)
         )
+        .route("/{id}", routing::post(handlers::user_vote::user_vote))
         .layer(middleware::from_fn_with_state(state.clone(), auth_only_middleware))
 }
