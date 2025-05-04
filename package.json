@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev"
+    "dev": "turbo run dev",
+    "generate:entity": "sea-orm-cli generate entity -u sqlite://apps/backend/voting_app.sqlite -o ./crates/entity/src --lib"
   },
   "devDependencies": {
     "turbo": "^2.5.2"
