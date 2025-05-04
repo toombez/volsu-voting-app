@@ -4,7 +4,7 @@ use crate::app_state::AppState;
 
 use super::handlers;
 
-pub fn create_router() -> Router<AppState> {
+pub fn create_router(state: AppState) -> Router<AppState> {
     Router::new()
         .route(
             "/register",

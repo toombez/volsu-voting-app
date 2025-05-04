@@ -15,8 +15,8 @@ async fn main() {
     let app_state = AppState { connection };
 
     let app = Router::new()
-        .merge(routers::create_router())
-        .with_state(app_state);
+        .merge(routers::create_router(app_state.clone()))
+        .with_state(app_state.clone());
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
