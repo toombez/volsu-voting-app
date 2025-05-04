@@ -17,5 +17,5 @@ pub fn create_router(state: AppState) -> Router<AppState> {
                 .layer(middleware::from_fn_with_state(state.clone(), auth_only_middleware))
         )
         .route("/", routing::get(handlers::get_votings_list::get_votings_list))
-
+        .route("/{id}", routing::get(handlers::get_voting_by_id::get_voting_by_id))
 }
