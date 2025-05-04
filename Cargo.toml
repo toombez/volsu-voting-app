@@ -2,8 +2,8 @@
 resolver = "2"
 members = [
     "apps/backend",
-    "apps/frontend",
-    "apps/tui-frontend", "crates/entity",
+    "apps/yew-frontend",
+    "apps/tui-frontend",
 
     "crates/migration",
     "crates/entity"
