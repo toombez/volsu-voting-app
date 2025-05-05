@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use web_sys::{wasm_bindgen::JsCast, HtmlInputElement};
 use yew::{html, Callback, Classes, Component, Html, InputEvent, Properties, SubmitEvent};
 
@@ -21,6 +22,7 @@ pub struct CredentialsForm {
 }
 
 #[derive(Debug, Default, Clone)]
+#[derive(Serialize, Deserialize)]
 pub struct CredentialsFormSubmitData {
     pub username: String,
     pub password: String,
