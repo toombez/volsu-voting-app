@@ -2,7 +2,7 @@ use gloo_net::http::Request;
 use serde::{Deserialize, Serialize};
 use yew::{html, Component, Html, MouseEvent};
 
-use crate::{components::forms::create_voting_form::CreateVotingForm, types::Voting};
+use crate::{components::{forms::create_voting_form::CreateVotingForm, voting_card::VotingCard}, types::Voting};
 
 
 pub enum IndexPageMessage {
@@ -86,7 +86,11 @@ impl Component for IndexPage {
                     { self
                         .votings
                         .iter()
-                        .map(|voting| html!(<li>{&*voting.title.clone()}</li>))
+                        .map(|voting| html!(
+                            <li>
+                                <VotingCard voting={voting.clone()} />
+                            </li>
+                        ))
                         .collect::<Html>()
                     }
                 </ul>
