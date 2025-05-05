@@ -8,6 +8,12 @@ pub enum MainRoute {
     #[at("/profile")]
     Profile,
 
+    #[at("/login")]
+    Login,
+
+    #[at("/register")]
+    Register,
+
     #[not_found]
     #[at("/404")]
     NotFound,
