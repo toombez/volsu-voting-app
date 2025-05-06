@@ -1,6 +1,7 @@
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use validator::Validate;
 
 use crate::api_response::SuccessApiResponse;
 
@@ -65,7 +66,7 @@ pub struct VotingWithAuthor {
 pub struct User {
     pub id: Uuid,
     pub username: String,
-    pub status: String,
+    pub status: Option<String>,
 }
 
 #[derive(Debug)]
@@ -75,17 +76,8 @@ pub struct User {
 pub struct UserWithVotings {
     pub id: Uuid,
     pub username: String,
-    pub status: String,
+    pub status: Option<String>,
     pub votings: Vec<Voting>,
-}
-
-#[derive(Debug)]
-#[derive(Clone)]
-#[derive(Serialize, Deserialize)]
-#[derive(PartialEq, PartialOrd)]
-pub struct UsersList {
-    pub users: Vec<User>,
-    pub pagination: Pagination,
 }
 
 #[derive(Debug)]
@@ -105,8 +97,11 @@ pub struct Me {
 #[derive(Clone)]
 #[derive(Serialize, Deserialize)]
 #[derive(PartialEq, PartialOrd)]
+#[derive(Validate)]
 pub struct CreateUserRequestBody {
+    #[validate(length(min = 3, message = "Username must contain at least 3 characters"))]
     pub username: String,
+    #[validate(length(min = 12, message = "Password must contain at least 12 characters"))]
     pub password: String,
 }
 
@@ -114,8 +109,11 @@ pub struct CreateUserRequestBody {
 #[derive(Clone)]
 #[derive(Serialize, Deserialize)]
 #[derive(PartialEq, PartialOrd)]
+#[derive(Validate)]
 pub struct PatchUserRequestBody {
+    #[validate(length(min = 3, message = "Username must contain at least 3 characters"))]
     pub username: Option<String>,
+    #[validate(length(min = 12, message = "Password must contain at least 12 characters"))]
     pub password: Option<String>,
     pub status: Option<String>,
 }
@@ -124,8 +122,11 @@ pub struct PatchUserRequestBody {
 #[derive(Clone)]
 #[derive(Serialize, Deserialize)]
 #[derive(PartialEq, PartialOrd)]
+#[derive(Validate)]
 pub struct CreateVotingRequestBody {
+    #[validate(length(min = 1, message = "Voting title must contain at least 1 characters"))]
     pub title: String,
+    #[validate(length(min = 1, message = "Voting text must contain at least 1 characters"))]
     pub text: String,
 }
 

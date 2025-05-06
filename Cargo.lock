@@ -4850,6 +4850,7 @@ dependencies = [
  "serde",
  "serde_json",
  "uuid",
+ "validator",
 ]
 
 [[package]]
