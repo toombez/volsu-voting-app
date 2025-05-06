@@ -7,4 +7,4 @@ members = [
 
     "crates/migration",
     "crates/entity"
-]
+, "crates/types"]
