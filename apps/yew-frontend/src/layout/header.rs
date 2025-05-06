@@ -97,7 +97,7 @@ impl Component for Header {
 
                             <Link<MainRoute>
                                 classes="navigation__link link"
-                                to={MainRoute::Login}
+                                to={MainRoute::Register}
                             >
                                 {"Зарегистрироваться"}
                             </Link<MainRoute>>
