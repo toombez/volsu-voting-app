@@ -1,20 +1,32 @@
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use axum::extract::Extension;
+use axum::extract::{Extension, State, Json};
+
+use types::dto::response::GetMePayload;
 
 use entity::user::Model as UserModel;
-use serde_json::json;
 
-use crate::types::SuccessResponse;
+use crate::app_state::AppState;
+use crate::repository::user_repository::GetUserQuery;
+use crate::utils::get_internal_error_response;
 
 pub async fn me(
+    State(state): State<AppState>,
     Extension(user): Extension<UserModel>,
 ) -> impl IntoResponse {
-    return (
-        StatusCode::OK,
-        SuccessResponse::new(json!({
-            "username": user.username,
-            "id": user.id,
-        }))
-    )
+    let user = state
+        .user_repository
+        .get_user(GetUserQuery::from(user.id))
+        .await;
+
+    match user {
+        Err(_error) => get_internal_error_response(),
+        Ok(user) => match user {
+            None => get_internal_error_response(),
+            Some(user) => (
+                StatusCode::OK,
+                Json(GetMePayload::new(&user))
+            ).into_response()
+        }
+    }
 }
