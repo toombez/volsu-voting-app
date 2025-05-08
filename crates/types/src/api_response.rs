@@ -1,8 +1,8 @@
 use std::fmt::Debug;
 use chrono::{NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use validator::{ValidationError, ValidationErrors};
+use serde_json::json;
 
 #[derive(Debug, Clone)]
 #[derive(Serialize, Deserialize)]
@@ -68,7 +68,7 @@ for ErrorApiResponse {
 }
 
 impl ErrorApiResponseData {
-    pub fn new(code: &str, message: &Option<String>) -> Self {
+    pub fn new(code: &str, message: Option<String>) -> Self {
         Self {
             code: code.to_string(),
             message: message.clone().map(|message| message.to_string()),
@@ -79,11 +79,22 @@ impl ErrorApiResponseData {
     }
 }
 
+impl From<&str> for ErrorApiResponseData {
+    fn from(value: &str) -> Self {
+        Self::new(value, None)
+    }
+}
+
 impl From<ValidationError> for ErrorApiResponseData {
     fn from(value: ValidationError) -> Self {
+        let code = &value.code;
+        let message = value
+            .message
+            .map(|message| message.to_string());
+
         Self::new(
-            &value.code,
-            &value.message.map(|message| message.to_string())
+            code,
+            message,
         )
     }
 }
