@@ -145,6 +145,7 @@ impl VotingRepository {
             author_id: Set(user.id),
             text: Set(data.text.clone()),
             title: Set(data.title.clone()),
+            id: Set(Uuid::new_v4()),
             ..Default::default()
         };
 

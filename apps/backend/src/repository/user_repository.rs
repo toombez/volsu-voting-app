@@ -183,12 +183,15 @@ impl UserRepository {
         let user = UserActiveModel {
             password: Set(hashed_password),
             username: Set(data.username.clone()),
+            id: Set(Uuid::new_v4()),
             ..Default::default()
         };
 
         let user = user
             .insert(&self.db)
             .await;
+
+        println!("{:?}", user);
 
         let user = match user {
             Err(error) => return Err(error),
