@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use web_sys::{wasm_bindgen::JsCast, HtmlInputElement};
-use yew::{html, Callback, Classes, Component, Html, InputEvent, Properties, SubmitEvent};
+use yew::{classes, html, Callback, Classes, Component, Html, InputEvent, Properties, SubmitEvent};
 
 #[derive(Properties, PartialEq)]
 pub struct CredentialsFormProps {
@@ -90,23 +90,27 @@ impl Component for CredentialsForm {
                     .map(|input| CredentialsFormMessage::SetPassword(input.value()))
             });
 
+        let class_prop = ctx.props().class.clone();
+
         html! {
             <form
-                class="form"
+                class={classes!("form", class_prop)}
                 onsubmit={on_submit}
             >
                 <div
                     class="form__field field"
                 >
-                    <label class="field__label">
-                        {"Username"}
+                    <label
+                        for="username-field"
+                        class="field__label"
+                    >
+                        {"Логин"}
                     </label>
-
-                    <br />
 
                     <input
                         class="field__input"
                         type="text"
+                        id="username-field"
                         value={username}
                         oninput={on_username_input}
                     />
@@ -115,13 +119,15 @@ impl Component for CredentialsForm {
                 <div
                     class="form__field field"
                 >
-                    <label class="field__label">
+                    <label
+                        for="password-field"
+                        class="field__label"
+                    >
                         {"Password"}
                     </label>
 
-                    <br />
-
                     <input
+                        id="password-field"
                         class="field__input"
                         type="password"
                         value={password}
@@ -133,7 +139,7 @@ impl Component for CredentialsForm {
                     class="form__button button"
                     type="submit"
                 >
-                    {"submit"}
+                    {"Зарегистрироваться"}
                 </button>
             </form>
         }

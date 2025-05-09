@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlInputElement, HtmlTextAreaElement};
 use yew::{html, Callback, Classes, Component, InputEvent, Properties, SubmitEvent};
@@ -11,13 +12,13 @@ pub enum CreateVotingFormMessage {
 #[derive(Debug, Clone, Properties, PartialEq)]
 pub struct CreateVotingFormProps {
     #[prop_or_default]
-    class: Classes,
+    pub class: Classes,
 
     #[prop_or_default]
-    on_submit: Callback<CreateVotingFormSubmitData>
+    pub on_submit: Callback<CreateVotingFormSubmitData>
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateVotingFormSubmitData {
     title: String,
     text: String,

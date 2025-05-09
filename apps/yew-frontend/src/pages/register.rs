@@ -1,16 +1,14 @@
-use gloo_net::http::Request;
+use types::dto::request::CreateUserBody;
 use yew::{html, Component};
 use yew_router::prelude::*;
 
-use crate::{components::forms::credentials_form::{CredentialsForm, CredentialsFormSubmitData}, router::main_route::MainRoute};
-
+use crate::{client::Client, components::forms::credentials_form::{CredentialsForm, CredentialsFormSubmitData}, router::main_route::MainRoute};
 
 pub enum RegisterPageMessage {
     TryRegister(CredentialsFormSubmitData),
 }
 
 pub struct RegisterPage;
-
 
 impl Component for RegisterPage {
     type Message = RegisterPageMessage;
@@ -25,22 +23,18 @@ impl Component for RegisterPage {
 
         match msg {
             RegisterPageMessage::TryRegister(data) => {
+                let client = Client::default();
+
                 wasm_bindgen_futures::spawn_local(async move {
-                    let response = Request
-                        ::post("http://127.0.0.1:3000/api/v1/users/register")
-                        .header("Content-Type", "application/json")
-                        .json(&data)
-                        .unwrap()
-                        .send()
-                        .await
-                        .unwrap()
-                    ;
+                    let response = client.register(&CreateUserBody {
+                        password: data.password.clone(),
+                        username: data.username.clone(),
+                    }).await;
 
-                    let status = response.status();
-
-                    if status != 201 {
-                        return
-                    }
+                    match response {
+                        Err(_) => return,
+                        Ok(_) => {}
+                    };
 
                     navigator.push(&MainRoute::Login);
                 });
@@ -58,9 +52,10 @@ impl Component for RegisterPage {
             });
 
         html!(
-            <div>
+            <div class="section register-section">
                 <CredentialsForm
                     on_submit={on_submit}
+                    class="register-form"
                 />
             </div>
         )
