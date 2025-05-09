@@ -1,24 +1,17 @@
-use gloo_net::http::Request;
 use serde::{Deserialize, Serialize};
-use yew::{html, Component, Html, MouseEvent};
+use types::dto::{models::Voting, request::PaginationQuery};
+use yew::{html, use_context, Callback, Component, Html, MouseEvent};
 
-use crate::{components::{forms::create_voting_form::CreateVotingForm, voting_card::VotingCard}, types::Voting};
+use crate::{components::{forms::create_voting_form::{CreateVotingForm, CreateVotingFormSubmitData}, voting_card::VotingCard}, providers::client_provider::ClientProvider, router::main_route::MainRoute};
 
+use yew_router::prelude::*;
 
 pub enum IndexPageMessage {
-    ToggleCreateVotingForm(bool),
     GetVotings(Vec<Voting>),
 }
 
 pub struct IndexPage {
-    pub votings: Vec<Voting>,
-    pub is_create_voting: bool
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct GetVotingsListResponse {
-    pub data: Vec<Voting>,
-    pub status: String,
+    pub votings: Vec<Voting>
 }
 
 impl Component for IndexPage {
@@ -28,73 +21,70 @@ impl Component for IndexPage {
     fn create(ctx: &yew::Context<Self>) -> Self {
         let link = ctx.link().clone();
 
-        wasm_bindgen_futures::spawn_local(async move {
-            let response = Request
-                ::get("http://localhost:3000/api/v1/votings?page=0&per_page=10")
-                .send()
-                .await
-                .unwrap()
-                .json::<GetVotingsListResponse>()
-                .await
-                .unwrap()
-            ;
+        let (client_provider, _) = ctx
+            .link()
+            .context::<ClientProvider>(Callback::noop())
+            .expect("Client provider not found");
 
-            link.send_message(IndexPageMessage::GetVotings(response.data));
+        wasm_bindgen_futures::spawn_local(async move {
+            let votings = client_provider
+                .client
+                .get_votings(&PaginationQuery {
+                    page: 0,
+                    per_page: 4,
+                })
+                .await
+                .unwrap();
+
+            link.send_message(IndexPageMessage::GetVotings(votings.data.items));
         });
 
         Self {
             votings: vec![],
-            is_create_voting: false,
         }
     }
 
     fn update(&mut self, _ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            IndexPageMessage::ToggleCreateVotingForm(is_open) => {
-                self.is_create_voting = is_open;
-            },
             IndexPageMessage::GetVotings(votings) => {
                 self.votings = votings;
-            }
+            },
         };
 
         true
     }
 
     fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        let on_open_create_voting = ctx
-            .link()
-            .batch_callback(|_event: MouseEvent| {
-                Some(IndexPageMessage::ToggleCreateVotingForm(true))
-            });
-
-        gloo::console::log!(format!("{:?}", self.votings));
-
         html! {
-            <>
-                <button
-                    onclick={on_open_create_voting}
-                >
-                    {"Создать голосование"}
-                </button>
+            <section class="new-votings-section section">
+                <h1 class="section__heading">
+                    {"Новые голосования"}
+                </h1>
 
-                if self.is_create_voting {
-                    <CreateVotingForm />
-                }
-
-                <ul>
+                <ul class="section__grid grid grid--cols-4">
                     { self
                         .votings
                         .iter()
                         .map(|voting| html!(
                             <li>
-                                <VotingCard voting={voting.clone()} />
+                                <VotingCard
+                                    voting={voting.clone()}
+                                />
                             </li>
                         ))
                         .collect::<Html>()
                     }
                 </ul>
-            </>
+
+                <div class="new-votings-section__buttons">
+                    <Link<MainRoute> to={MainRoute::Votings} classes="button">
+                        {"Ко всем голосованиям"}
+                    </Link<MainRoute>>
+                    <button class="button">
+                        {"Создать голосование"}
+                    </button>
+                </div>
+            </section>
         }
     }
 }

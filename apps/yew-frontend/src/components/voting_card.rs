@@ -1,6 +1,5 @@
+use types::dto::models::Voting;
 use yew::{html, Component, Properties};
-
-use crate::types::Voting;
 
 #[derive(Debug, Clone, Properties, PartialEq)]
 pub struct VotingCardProps {
@@ -26,17 +25,28 @@ impl Component for VotingCard {
         let title = self.voting.title.clone();
         let votes_count = self.voting.votes_count;
 
-        let author_username = self.voting.author.username.clone();
-
         html! {
-            <article id={id.clone().to_string()}>
-                <h1>
-                    {&*author_username}{":"} {&*title}
+            <article
+                class="voting"
+                id={id.clone().to_string()}
+            >
+                <h1 class="voting__title">
+                    {&*title}
                 </h1>
 
-                <button>
-                    {votes_count} {" Проголосовать \"За\""}
-                </button>
+                <h2 class="voting__votes-count">
+                    {"Голосов: "} {votes_count}
+                </h2>
+
+                <div class="voting__buttons">
+                    <button class="voting__more-button button">
+                        {"Подробнее"}
+                    </button>
+
+                    <button class="voting__vote-button button">
+                        {"Проголосовать"}
+                    </button>
+                </div>
             </article>
         }
     }
