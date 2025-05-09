@@ -63,47 +63,49 @@ impl Component for Header {
 
         html! {
             <header class="header">
-                <nav class="header__navigation navigation">
-                    <Link<MainRoute>
-                        classes="navigation__link link"
-                        to={MainRoute::Index}
-                    >
-                        { "Главная" }
-                    </Link<MainRoute>>
+                <section class="section">
+                    <nav class="header__navigation navigation">
+                        <Link<MainRoute>
+                            classes="navigation__link link"
+                            to={MainRoute::Index}
+                        >
+                            { "Главная" }
+                        </Link<MainRoute>>
 
-                    if is_logged_in {
-                        <div>
-                            <Link<MainRoute>
-                                classes="navigation__link link"
-                                to={MainRoute::Profile}
-                            >
-                                {"Профиль"}
-                            </Link<MainRoute>>
+                        if is_logged_in {
+                            <div class="header__profile-navigation">
+                                <Link<MainRoute>
+                                    classes="navigation__link link"
+                                    to={MainRoute::Profile}
+                                >
+                                    {"Профиль"}
+                                </Link<MainRoute>>
 
-                            <button
-                                onclick={logout}
-                            >
-                                {"Выйти"}
-                            </button>
-                        </div>
-                    } else {
-                        <div>
-                            <Link<MainRoute>
-                                classes="navigation__link link"
-                                to={MainRoute::Login}
-                            >
-                                {"Войти"}
-                            </Link<MainRoute>>
+                                <button
+                                    onclick={logout}
+                                >
+                                    {"Выйти"}
+                                </button>
+                            </div>
+                        } else {
+                            <div class="header__user-navigation">
+                                <Link<MainRoute>
+                                    classes="navigation__link link"
+                                    to={MainRoute::Login}
+                                >
+                                    {"Войти"}
+                                </Link<MainRoute>>
 
-                            <Link<MainRoute>
-                                classes="navigation__link link"
-                                to={MainRoute::Register}
-                            >
-                                {"Зарегистрироваться"}
-                            </Link<MainRoute>>
-                        </div>
-                    }
-                </nav>
+                                <Link<MainRoute>
+                                    classes="navigation__link link"
+                                    to={MainRoute::Register}
+                                >
+                                    {"Зарегистрироваться"}
+                                </Link<MainRoute>>
+                            </div>
+                        }
+                    </nav>
+                </section>
             </header>
         }
     }

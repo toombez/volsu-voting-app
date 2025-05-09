@@ -9,14 +9,14 @@ use crate::router::main_route::MainRoute;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct User {
-    username: String,
-    id: Uuid,
+    pub username: String,
+    pub id: Uuid,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GetUserResponse {
-    data: User,
-    status: String,
+    pub data: User,
+    pub status: String,
 }
 
 #[derive(Debug)]
