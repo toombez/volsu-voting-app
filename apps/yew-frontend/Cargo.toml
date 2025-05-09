@@ -22,3 +22,6 @@ wasm-cookies = "0.2.1"
 web-sys = { version = "0.3.77", features = ["Window", "Document", "HtmlDocument", "Navigator"] }
 yew = { version="0.21", features=["csr"] }
 yew-router = "0.18.0"
+types = { path = "../../crates/types" }
+chrono = { version = "0.4.41", features = ["serde"] }
+yewdux = "0.10"
