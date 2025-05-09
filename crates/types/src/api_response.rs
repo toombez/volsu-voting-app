@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 use chrono::{NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "validator")]
 use validator::{ValidationError, ValidationErrors};
 use serde_json::json;
 
@@ -85,6 +86,7 @@ impl From<&str> for ErrorApiResponseData {
     }
 }
 
+#[cfg(feature = "validator")]
 impl From<ValidationError> for ErrorApiResponseData {
     fn from(value: ValidationError) -> Self {
         let code = &value.code;
@@ -99,6 +101,7 @@ impl From<ValidationError> for ErrorApiResponseData {
     }
 }
 
+#[cfg(feature = "validator")]
 impl From<ValidationErrors> for ErrorApiResponse {
     fn from(value: ValidationErrors) -> Self {
         let errors = value

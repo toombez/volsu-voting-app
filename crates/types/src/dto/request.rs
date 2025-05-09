@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "validator")]
 use validator::Validate;
 
 // ============================================================================
@@ -22,11 +23,11 @@ pub struct PaginationQuery {
 #[derive(Clone)]
 #[derive(Serialize, Deserialize)]
 #[derive(PartialEq, PartialOrd)]
-#[derive(Validate)]
+#[cfg_attr(feature = "validator", derive(Validate))]
 pub struct CreateUserBody {
-    #[validate(length(min = 3, message = "Username must contain at least 3 characters"))]
+    #[cfg_attr(feature = "validator", validate(length(min = 3, message = "Username must contain at least 3 characters")))]
     pub username: String,
-    #[validate(length(min = 12, message = "Password must contain at least 12 characters"))]
+    #[cfg_attr(feature = "validator", validate(length(min = 12, message = "Password must contain at least 12 characters")))]
     pub password: String,
 }
 
@@ -34,11 +35,11 @@ pub struct CreateUserBody {
 #[derive(Clone)]
 #[derive(Serialize, Deserialize)]
 #[derive(PartialEq, PartialOrd)]
-#[derive(Validate)]
+#[cfg_attr(feature = "validator", derive(Validate))]
 pub struct PatchUserBody {
-    #[validate(length(min = 3, message = "Username must contain at least 3 characters"))]
+    #[cfg_attr(feature = "validator", validate(length(min = 3, message = "Username must contain at least 3 characters")))]
     pub username: Option<String>,
-    #[validate(length(min = 12, message = "Password must contain at least 12 characters"))]
+    #[cfg_attr(feature = "validator", validate(length(min = 12, message = "Password must contain at least 12 characters")))]
     pub password: Option<String>,
     pub status: Option<String>,
 }
@@ -47,7 +48,6 @@ pub struct PatchUserBody {
 #[derive(Clone)]
 #[derive(Serialize, Deserialize)]
 #[derive(PartialEq, PartialOrd)]
-#[derive(Validate)]
 pub struct LoginUserBody {
     pub username: String,
     pub password: String
@@ -61,10 +61,10 @@ pub struct LoginUserBody {
 #[derive(Clone)]
 #[derive(Serialize, Deserialize)]
 #[derive(PartialEq, PartialOrd)]
-#[derive(Validate)]
+#[cfg_attr(feature = "validator", derive(Validate))]
 pub struct CreateVotingBody {
-    #[validate(length(min = 1, message = "Voting title must contain at least 1 characters"))]
+    #[cfg_attr(feature = "validator", validate(length(min = 1, message = "Voting title must contain at least 1 characters")))]
     pub title: String,
-    #[validate(length(min = 1, message = "Voting text must contain at least 1 characters"))]
+    #[cfg_attr(feature = "validator", validate(length(min = 1, message = "Voting text must contain at least 1 characters")))]
     pub text: String,
 }
