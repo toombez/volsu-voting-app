@@ -26,4 +26,7 @@ pub enum MainRoute {
     Voting {
         id: Uuid,
     },
+
+    #[at("/create_voting")]
+    CreateVoting,
 }

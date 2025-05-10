@@ -5,3 +5,4 @@ pub mod register;
 pub mod login;
 pub mod voting;
 pub mod votings;
+pub mod create_voting;

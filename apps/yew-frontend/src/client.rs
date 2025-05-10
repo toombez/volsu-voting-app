@@ -101,8 +101,24 @@ impl Client {
         Ok(user)
     }
 
-    pub async fn create_voting(&self, data: &CreateVotingBody) -> Result<CreateVotingPayload, ()> {
-        Err(())
+    pub async fn create_voting(&self, token: String, data: &CreateVotingBody) -> Result<CreateVotingPayload, ()> {
+        let response = Request
+            ::post(&Self::join_route(vec![
+                &self.base_url,
+                "votings"
+            ]))
+            .header("authorization", format!("Bearer {}", token).as_str())
+            .json(&data)
+            .unwrap()
+            .send()
+            .await
+            .unwrap();
+
+        if response.status() != 201 {
+            return Err(())
+        }
+
+        Ok(response.json().await.unwrap())
     }
 
     pub async fn vote(&self, token: String, id: Uuid) -> Result<VotePayload, ()> {
@@ -121,11 +137,7 @@ impl Client {
             return Err(())
         }
 
-        gloo::console::log!(format!("{:?}", response.json::<VotePayload>().await));
-
-        Err(())
-
-        // Ok(response.json().await.unwrap())
+        Ok(response.json().await.unwrap())
     }
 
     pub async fn get_votings(&self, pagination: &PaginationQuery) -> Result<GetVotingsListPayload, ()> {

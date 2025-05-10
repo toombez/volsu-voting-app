@@ -1,6 +1,6 @@
 use yew::{html, Html};
 
-use crate::pages::{index::IndexPage, login::LoginPage, not_found::NotFoundPage, profile::ProfilePage, register::RegisterPage, voting::VotingPage, votings::VotingsPage};
+use crate::pages::{create_voting::CreateVotingPage, index::IndexPage, login::LoginPage, not_found::NotFoundPage, profile::ProfilePage, register::RegisterPage, voting::VotingPage, votings::VotingsPage};
 
 use super::main_route::MainRoute;
 
@@ -13,5 +13,6 @@ pub fn main_switch(routes: MainRoute) -> Html {
         MainRoute::Register => html! { <RegisterPage /> },
         MainRoute::Voting { id } => html! { <VotingPage id={id} /> },
         MainRoute::Votings => html! { <VotingsPage /> },
+        MainRoute::CreateVoting => html! {<CreateVotingPage />}
     }
 }

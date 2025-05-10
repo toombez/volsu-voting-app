@@ -1,5 +1,5 @@
 use types::dto::request::PaginationQuery;
-use yew::{function_component, html, suspense::use_future, use_context, use_state, Html};
+use yew::{function_component, html, suspense::use_future, use_context, use_state, Callback, Html, MouseEvent};
 
 use crate::{components::voting_card::VotingCard, providers::client_provider::ClientProvider, router::main_route::MainRoute};
 
@@ -12,6 +12,8 @@ pub fn IndexPage() -> Html {
         ::<ClientProvider>()
         .expect("Client context not found");
     let client = client_provider.client;
+
+    let navigator = use_navigator().unwrap();
 
     let _ = use_future({
         let client = client.clone();
@@ -32,6 +34,16 @@ pub fn IndexPage() -> Html {
             votings.set(votings_response.data.items)
         }
     });
+
+    let on_create_voting_click = {
+        let navigator = navigator.clone();
+
+        Callback::from(move |event: MouseEvent| {
+            event.prevent_default();
+
+            navigator.push(&MainRoute::CreateVoting);
+        })
+    };
 
     html! {
         <section class="new-votings-section section">
@@ -58,7 +70,7 @@ pub fn IndexPage() -> Html {
                 <Link<MainRoute> to={MainRoute::Votings} classes="button">
                     {"Ко всем голосованиям"}
                 </Link<MainRoute>>
-                <button class="button">
+                <button class="button" onclick={on_create_voting_click}>
                     {"Создать голосование"}
                 </button>
             </div>

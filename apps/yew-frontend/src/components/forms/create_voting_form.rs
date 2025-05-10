@@ -20,8 +20,8 @@ pub struct CreateVotingFormProps {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CreateVotingFormSubmitData {
-    title: String,
-    text: String,
+    pub title: String,
+    pub text: String,
 }
 
 #[function_component]
