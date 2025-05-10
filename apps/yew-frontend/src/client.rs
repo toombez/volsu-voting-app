@@ -77,16 +77,55 @@ impl Client {
         Err(())
     }
 
-    pub async fn me(&self) -> Result<GetMePayload, ()> {
-        Err(())
+    pub async fn me(&self, token: String) -> Result<GetMePayload, ()> {
+        let response = Request
+            ::get(&Self::join_route(vec![
+                &self.base_url,
+                "users",
+                "me"
+            ]))
+            .header("authorization", format!("Bearer {}", token).as_str())
+            .send()
+            .await
+            .unwrap();
+
+        if response.status() != 200 {
+            return Err(())
+        }
+
+        let user = response
+            .json::<GetMePayload>()
+            .await
+            .unwrap();
+
+        Ok(user)
     }
 
     pub async fn create_voting(&self, data: &CreateVotingBody) -> Result<CreateVotingPayload, ()> {
         Err(())
     }
 
-    pub async fn vote(&self, id: Uuid) -> Result<VotePayload, ()> {
+    pub async fn vote(&self, token: String, id: Uuid) -> Result<VotePayload, ()> {
+        let response = Request
+            ::post(&Self::join_route(vec![
+                &self.base_url,
+                "votings",
+                id.to_string().as_str(),
+            ]))
+            .header("authorization", format!("Bearer {}", token).as_str())
+            .send()
+            .await
+            .unwrap();
+
+        if response.status() != 201 {
+            return Err(())
+        }
+
+        gloo::console::log!(format!("{:?}", response.json::<VotePayload>().await));
+
         Err(())
+
+        // Ok(response.json().await.unwrap())
     }
 
     pub async fn get_votings(&self, pagination: &PaginationQuery) -> Result<GetVotingsListPayload, ()> {
@@ -113,6 +152,25 @@ impl Client {
     }
 
     pub async fn get_voting(&self, id: Uuid) -> Result<GetVotingPayload, ()> {
-        Err(())
+        let response = Request
+            ::get(&Self::join_route(vec![
+                &self.base_url,
+                "votings",
+                id.to_string().as_str(),
+            ]))
+            .send()
+            .await
+            .unwrap();
+
+        if response.status() != 200 {
+            return Err(())
+        }
+
+        let response = response
+            .json::<GetVotingPayload>()
+            .await
+            .unwrap();
+
+        Ok(response)
     }
 }
