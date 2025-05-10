@@ -1,40 +1,41 @@
+use axum::{extract::{Path, State}, http::StatusCode, response::IntoResponse};
+use serde_json::json;
 use uuid::Uuid;
 
-use axum::extract::{Path, State, Json};
-use axum::http::StatusCode;
-use axum::response::IntoResponse;
+use crate::{app_state::AppState, types::{ErrorResponse, SuccessResponse}};
 
-use types::api_response::{ErrorApiResponse, ErrorApiResponseData};
-use types::dto::response::GetUserPayload;
-
-use crate::app_state::AppState;
-use crate::repository::user_repository::GetUserQuery;
-use crate::utils::get_internal_error_response;
+use entity::user::Entity as UserEntity;
+use sea_orm::entity::*;
 
 pub async fn get_user_by_id(
     Path(id): Path<Uuid>,
     State(state): State<AppState>
 ) -> impl IntoResponse {
-    let user = state.user_repository
-        .get_user(GetUserQuery::from(id))
+    let user = UserEntity::find_by_id(id)
+        .one(&state.connection)
         .await;
 
-    match user {
-        Err(_error) => get_internal_error_response(),
-        Ok(user) => match user {
-            None => (
-                StatusCode::NOT_FOUND,
-                Json(ErrorApiResponse::from(
-                    ErrorApiResponseData::new(
-                        StatusCode::NOT_FOUND.as_str(),
-                        Some("User not found".to_string())
-                    )
-                ))
-            ).into_response(),
-            Some(user) => (
-                StatusCode::OK,
-                Json(GetUserPayload::new(&user)),
-            ).into_response()
-        }
-    }
+    let user = match user {
+        Err(_error) => return (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            ErrorResponse::new(json!("Internal server error")),
+        ).into_response(),
+        Ok(user) => user,
+    };
+
+    let user = match user {
+        None => return (
+            StatusCode::NOT_FOUND,
+            ErrorResponse::new(json!("User not found"))
+        ).into_response(),
+        Some(user) => user,
+    };
+
+    return (
+        StatusCode::OK,
+        SuccessResponse::new(json!({
+            "id": user.id,
+            "username": user.username,
+        }))
+    ).into_response()
 }
