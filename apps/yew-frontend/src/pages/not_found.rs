@@ -1,16 +1,6 @@
-use yew::{html, Component};
+use yew::{function_component, html, Html};
 
-pub struct NotFoundPage;
-
-impl Component for NotFoundPage {
-    type Message = ();
-    type Properties = ();
-
-    fn create(ctx: &yew::Context<Self>) -> Self {
-        Self
-    }
-
-    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        html!("Not found")
-    }
+#[function_component]
+pub fn NotFoundPage() -> Html {
+    html!("Not found")
 }

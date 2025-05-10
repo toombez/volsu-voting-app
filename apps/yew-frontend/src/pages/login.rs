@@ -1,99 +1,71 @@
-use gloo::net::http::Request;
-use serde::{Deserialize, Serialize};
-use wasm_bindgen::JsCast;
-use yew::{html, Component};
-use yew_router::prelude::RouterScopeExt;
+use types::dto::request::LoginUserBody;
+use yew::{function_component, html, use_context, Callback, Html};
+use yew_router::hooks::use_navigator;
+use yewdux::use_store;
 
-use crate::{components::forms::credentials_form::{CredentialsForm, CredentialsFormSubmitData}, router::main_route::MainRoute};
+use crate::{components::forms::credentials_form::{CredentialsForm, CredentialsFormSubmitData}, providers::client_provider::ClientProvider, router::main_route::MainRoute, state::app_state::AppState, utils::store_token};
 
-pub enum LoginPageMessage {
-    TryLogin(CredentialsFormSubmitData),
-}
-pub struct LoginPage;
+#[function_component]
+pub fn LoginPage() -> Html {
+    let client_provider = use_context
+        ::<ClientProvider>()
+        .expect("Client context not found");
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct LoginApiResponseData {
-    pub token: String
-}
+    let client = client_provider.client;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct LoginApiResponse {
-    pub data: LoginApiResponseData
-}
+    let (_, dispatch) = use_store::<AppState>();
 
-impl Component for LoginPage {
-    type Message = LoginPageMessage;
-    type Properties = ();
+    let navigator = use_navigator().unwrap();
 
-    fn create(_ctx: &yew::Context<Self>) -> Self {
-        Self
-    }
+    let on_submit = {
+        let client = client.clone();
+        let dispatch = dispatch.clone();
+        let navigator = navigator.clone();
 
-    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
-        let navigator = ctx.link().navigator().unwrap();
+        Callback
+            ::from(move |data: CredentialsFormSubmitData| {
+                let client = client.clone();
+                let dispatch = dispatch.clone();
+                let navigator = navigator.clone();
 
-        match msg {
-            LoginPageMessage::TryLogin(data) => {
                 wasm_bindgen_futures::spawn_local(async move {
-                    let response = Request
-                        ::post("http://127.0.0.1:3000/api/v1/auth/login")
-                        .header("Content-Type", "application/json")
-                        .json(&data)
-                        .unwrap()
-                        .send()
-                        .await
-                        .unwrap()
-                    ;
+                    let response = client
+                        .login(&LoginUserBody {
+                            password: data.password.clone(),
+                            username: data.username.clone(),
+                        })
+                        .await;
 
-                    let status = response.status();
-
-                    if status != 200 {
-                        return
-                    }
-
-                    let response = response
-                        .json::<LoginApiResponse>()
-                        .await
-                        .unwrap()
-                    ;
+                    let response = match response {
+                        Err(_) => return,
+                        Ok(response) => response,
+                    };
 
                     let token = response.data.token;
-                    let token_cookie = wasm_cookies::cookies::set(
-                        "token",
-                        &token,
-                        &wasm_cookies::CookieOptions::default()
-                    );
 
-                    let document = web_sys::window()
-                        .unwrap()
-                        .document()
-                        .unwrap()
-                        .dyn_into::<web_sys::HtmlDocument>()
-                        .unwrap();
+                    store_token(&token);
 
-                    let _ = document.set_cookie(&token_cookie);
+                    let response = client
+                        .me(token)
+                        .await;
+
+                    let response = match response {
+                        Err(()) => return,
+                        Ok(user) => user,
+                    };
+
+                    dispatch.reduce_mut(|state| state.auth_user = Some(response.data));
 
                     navigator.push(&MainRoute::Profile);
                 });
-            }
-        };
+            })
+    };
 
-        true
-    }
-
-    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        let on_submit = ctx
-            .link()
-            .batch_callback(|data: CredentialsFormSubmitData| {
-                Some(LoginPageMessage::TryLogin(data))
-            });
-
-        html! {
-            <div>
-                <CredentialsForm
-                    on_submit={on_submit}
-                />
-            </div>
-        }
+    html! {
+        <div class="login-section section">
+            <CredentialsForm
+                on_submit={on_submit}
+            />
+        </div>
     }
 }
