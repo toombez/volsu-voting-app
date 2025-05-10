@@ -78,21 +78,31 @@ pub fn CreateVotingForm(props: &CreateVotingFormProps) -> Html {
 
 
     html! {
-        <form onsubmit={on_submit}>
-            <div>
+        <form class="form" onsubmit={on_submit}>
+            <div class="form__field field">
+                <label class="field__label" for="title-field">
+                    {"Заголовок"}
+                </label>
                 <input
+                    class="field__input"
+                    id="title-field"
                     oninput={on_title_input}
                     type="text"
                 />
             </div>
 
             <div>
+                <label class="field__label" for="title-text">
+                    {"Описание"}
+                </label>
                 <textarea
+                    id="title-text"
+                    class="field__input"
                     oninput={on_text_input}
                 ></textarea>
             </div>
 
-            <button type="submit">
+            <button type="submit" class="button">
                 {"Создать"}
             </button>
         </form>
