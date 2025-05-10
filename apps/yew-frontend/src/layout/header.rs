@@ -1,10 +1,35 @@
-use yew::{function_component, html, use_state, Html};
+use yew::{function_component, html, use_effect_with, use_state, Callback, Html, MouseEvent};
 use yew_router::prelude::*;
-use crate::router::main_route::MainRoute;
+use yewdux::use_store;
+use crate::{router::main_route::MainRoute, state::app_state::AppState, utils::{clear_token, get_token}};
 
 #[function_component]
 pub fn Header() -> Html {
     let is_logged_in = use_state(|| false);
+
+    let (state, dispatch) = use_store::<AppState>();
+
+    {
+        let is_logged_in = is_logged_in.clone();
+
+        use_effect_with(state, move |state| {
+            is_logged_in.set(state.is_logged_in());
+        });
+    }
+
+    let log_out = {
+        let dispatch = dispatch.clone();
+
+        Callback
+            ::from(move |event: MouseEvent| {
+                event.prevent_default();
+
+                clear_token();
+                gloo::console::log!(format!("Logged {:?}", get_token()));
+
+                dispatch.reduce_mut(|state| state.auth_user = None);
+            })
+    };
 
     return html! {
         <header class="header">
@@ -26,7 +51,7 @@ pub fn Header() -> Html {
                                 {"Профиль"}
                             </Link<MainRoute>>
 
-                            <button>
+                            <button onclick={log_out}>
                                 {"Выйти"}
                             </button>
                         </div>
