@@ -1,53 +1,75 @@
 use types::dto::models::Voting;
-use yew::{html, Component, Properties};
+use uuid::Uuid;
+use yew::{function_component, html, Callback, Html, MouseEvent, Properties};
+use yew_router::hooks::use_navigator;
+
+use crate::router::main_route::MainRoute;
 
 #[derive(Debug, Clone, Properties, PartialEq)]
 pub struct VotingCardProps {
-    pub voting: Voting
+    pub voting: Voting,
+
+    #[prop_or_default]
+    pub on_vote: Callback<Uuid>,
 }
 
-pub struct VotingCard {
-    voting: Voting
-}
+#[function_component]
+pub fn VotingCard(props: &VotingCardProps) -> Html {
+    let navigator = use_navigator().unwrap();
 
-impl Component for VotingCard {
-    type Message = ();
-    type Properties = VotingCardProps;
+    let on_vote_prop = &props.on_vote;
+    let voting_prop = props.voting.clone();
 
-    fn create(ctx: &yew::Context<Self>) -> Self {
-        let voting = &ctx.props().voting;
+    let id = voting_prop.id.clone();
+    let title = voting_prop.title.clone();
+    let votes_count = voting_prop.votes_count;
 
-        Self { voting: voting.clone() }
-    }
+    let on_vote_button_click = {
+        let on_vote_prop = on_vote_prop.clone();
+        let id = id.clone();
 
-    fn view(&self, _ctx: &yew::Context<Self>) -> yew::Html {
-        let id = self.voting.id.clone();
-        let title = self.voting.title.clone();
-        let votes_count = self.voting.votes_count;
+        Callback::from(move |event: MouseEvent| {
+            event.prevent_default();
 
-        html! {
-            <article
-                class="voting"
-                id={id.clone().to_string()}
-            >
-                <h1 class="voting__title">
-                    {&*title}
-                </h1>
+            on_vote_prop.emit(id);
+        })
+    };
 
-                <h2 class="voting__votes-count">
-                    {"Голосов: "} {votes_count}
-                </h2>
+    let on_more_click = {
+        let navigator = navigator.clone();
+        let id = id.clone();
 
-                <div class="voting__buttons">
-                    <button class="voting__more-button button">
-                        {"Подробнее"}
-                    </button>
+        Callback::from(move |event: MouseEvent| {
+            event.prevent_default();
 
-                    <button class="voting__vote-button button">
-                        {"Проголосовать"}
-                    </button>
-                </div>
-            </article>
-        }
+            navigator.push(&MainRoute::Voting { id });
+        })
+    };
+
+    html! {
+        <article
+            class="voting"
+            id={id.clone().to_string()}
+        >
+            <h1 class="voting__title">
+                {&*title}
+            </h1>
+
+            <h2 class="voting__votes-count">
+                {"Голосов: "} {votes_count}
+            </h2>
+
+            <div class="voting__buttons">
+                <button class="voting__more-button button" onclick={on_more_click}>
+                    {"Подробнее"}
+                </button>
+
+                <button class="voting__vote-button button"
+                    onclick={on_vote_button_click}
+                >
+                    {"Проголосовать"}
+                </button>
+            </div>
+        </article>
     }
 }
