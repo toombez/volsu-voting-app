@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlInputElement, HtmlTextAreaElement};
-use yew::{html, Callback, Classes, Component, InputEvent, Properties, SubmitEvent};
+use yew::{function_component, html, use_state, Callback, Classes, Html, InputEvent, Properties, SubmitEvent};
 
 pub enum CreateVotingFormMessage {
     Submit,
@@ -24,92 +24,77 @@ pub struct CreateVotingFormSubmitData {
     text: String,
 }
 
-pub struct CreateVotingForm {
-    state: CreateVotingFormSubmitData,
-}
+#[function_component]
+pub fn CreateVotingForm(props: &CreateVotingFormProps) -> Html {
+    let title = use_state(|| String::default());
+    let text = use_state(|| String::default());
 
-impl Component for CreateVotingForm {
-    type Message = CreateVotingFormMessage;
-    type Properties = CreateVotingFormProps;
+    let on_submit_prop = props.on_submit.clone();
 
-    fn create(_ctx: &yew::Context<Self>) -> Self {
-        Self {
-            state: CreateVotingFormSubmitData::default(),
-        }
-    }
+    let on_submit = {
+        let title = title.clone();
+        let text = text.clone();
 
-    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
-        let props =  ctx.props();
-
-        match msg {
-            CreateVotingFormMessage::Submit => {
-                let on_submit = &props.on_submit;
-
-                on_submit.emit(self.state.clone());
-            },
-            CreateVotingFormMessage::SetText(text) => {
-                self.state.text = text;
-            },
-            CreateVotingFormMessage::SetTitle(title) => {
-                self.state.title = title;
-            },
-        };
-
-        true
-    }
-
-    fn view(&self, ctx: &yew::Context<Self>) -> yew::Html {
-        let on_submit = ctx
-            .link()
-            .batch_callback(|event: SubmitEvent| {
+        Callback
+            ::from(move |event: SubmitEvent| {
                 event.prevent_default();
 
-                Some(CreateVotingFormMessage::Submit)
-            });
+                on_submit_prop.emit(CreateVotingFormSubmitData {
+                    title: (*title).clone(),
+                    text: (*text).clone(),
+                })
+            })
+    };
 
-        let on_title_input = ctx
-            .link()
-            .batch_callback(|event: InputEvent| {
+    let on_title_input = {
+        let title = title.clone();
+
+        Callback
+            ::from(move |event: InputEvent| {
                 event
                     .target()
                     .and_then(|target| target
                         .dyn_into::<HtmlInputElement>()
                         .ok()
                     )
-                    .map(|input| CreateVotingFormMessage::SetTitle(input.value()))
-            });
+                    .map(|input| title.set(input.value()));
+            })
+    };
 
-        let on_text_input = ctx
-            .link()
-            .batch_callback(|event: InputEvent| {
+    let on_text_input = {
+        let text = text.clone();
+
+        Callback
+            ::from(move |event: InputEvent| {
                 event
                     .target()
                     .and_then(|target| target
                         .dyn_into::<HtmlTextAreaElement>()
                         .ok()
                     )
-                    .map(|input| CreateVotingFormMessage::SetText(input.value()))
-            });
+                    .map(|input| text.set(input.value()));
+            })
+    };
 
-        html! {
-            <form onsubmit={on_submit}>
-                <div>
-                    <input
-                        oninput={on_title_input}
-                        type="text"
-                    />
-                </div>
 
-                <div>
-                    <textarea
-                        oninput={on_text_input}
-                    ></textarea>
-                </div>
+    html! {
+        <form onsubmit={on_submit}>
+            <div>
+                <input
+                    oninput={on_title_input}
+                    type="text"
+                />
+            </div>
 
-                <button type="submit">
-                    {"Создать"}
-                </button>
-            </form>
-        }
+            <div>
+                <textarea
+                    oninput={on_text_input}
+                ></textarea>
+            </div>
+
+            <button type="submit">
+                {"Создать"}
+            </button>
+        </form>
     }
 }

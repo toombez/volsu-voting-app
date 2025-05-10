@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use web_sys::{wasm_bindgen::JsCast, HtmlInputElement};
-use yew::{classes, html, Callback, Classes, Component, Html, InputEvent, Properties, SubmitEvent};
+use yew::{classes, function_component, html, use_state, Callback, Classes, Html, InputEvent, Properties, SubmitEvent};
 
 #[derive(Properties, PartialEq)]
 pub struct CredentialsFormProps {
@@ -11,16 +11,6 @@ pub struct CredentialsFormProps {
     pub on_submit: Callback<CredentialsFormSubmitData, ()>
 }
 
-pub enum CredentialsFormMessage {
-    Submit,
-    SetPassword(String),
-    SetUsername(String),
-}
-
-pub struct CredentialsForm {
-    pub state: CredentialsFormSubmitData
-}
-
 #[derive(Debug, Default, Clone)]
 #[derive(Serialize, Deserialize)]
 pub struct CredentialsFormSubmitData {
@@ -28,120 +18,107 @@ pub struct CredentialsFormSubmitData {
     pub password: String,
 }
 
-impl Component for CredentialsForm {
-    type Message = CredentialsFormMessage;
-    type Properties = CredentialsFormProps;
+#[function_component]
+pub fn CredentialsForm(props: &CredentialsFormProps) -> Html {
+    let username = use_state(|| String::default());
+    let password = use_state(|| String::default());
 
-    fn create(_ctx: &yew::Context<Self>) -> Self {
-        Self { state: CredentialsFormSubmitData::default() }
-    }
+    let class_prop = props.class.clone();
+    let on_submit_prop = props.on_submit.clone();
 
-    fn update(&mut self, ctx: &yew::Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            CredentialsFormMessage::SetPassword(password) => {
-                self.state.password = password;
-            },
-            CredentialsFormMessage::SetUsername(username) => {
-                self.state.username = username;
-            },
-            CredentialsFormMessage::Submit => {
-                let on_submit_props = &ctx.props().on_submit;
-                let data = self.state.clone();
+    let on_submit = {
+        let username = username.clone();
+        let password = password.clone();
 
-                on_submit_props.emit(data)
-            }
-        };
+        Callback::from(move |event: SubmitEvent| {
+            event.prevent_default();
 
-        true
-    }
+            on_submit_prop.emit(CredentialsFormSubmitData {
+                username: (*username).clone(),
+                password: (*password).clone(),
+            })
+        })
+    };
 
-    fn view(&self, ctx: &yew::Context<Self>) -> Html {
-        let username = self.state.username.clone();
-        let password = self.state.password.clone();
+    let on_username_input = {
+        let username = username.clone();
 
-        let on_submit = ctx
-            .link()
-            .batch_callback(move |event: SubmitEvent| {
-                event.prevent_default();
-                Some(CredentialsFormMessage::Submit)
-            });
-
-        let on_username_input = ctx
-            .link()
-            .batch_callback(|event: InputEvent| {
+        Callback
+            ::from(move |event: InputEvent| {
                 event
                     .target()
                     .and_then(|target| target
                         .dyn_into::<HtmlInputElement>()
                         .ok()
                     )
-                    .map(|input| CredentialsFormMessage::SetUsername(input.value()))
-            });
+                    .map(|input| username.set(input.value()));
+            })
+    };
 
-        let on_password_input = ctx
-            .link()
-            .batch_callback(|event: InputEvent| {
+    let on_password_input = {
+        let password = password.clone();
+
+        Callback
+            ::from(move |event: InputEvent| {
                 event
                     .target()
                     .and_then(|target| target
                         .dyn_into::<HtmlInputElement>()
                         .ok()
                     )
-                    .map(|input| CredentialsFormMessage::SetPassword(input.value()))
-            });
+                    .map(|input| password.set(input.value()));
+            })
+    };
 
-        let class_prop = ctx.props().class.clone();
-
-        html! {
-            <form
-                class={classes!("form", class_prop)}
-                onsubmit={on_submit}
+    html! {
+        <form
+            class={classes!("form", class_prop)}
+            onsubmit={on_submit}
+        >
+            <div
+                class="form__field field"
             >
-                <div
-                    class="form__field field"
+                <label
+                    for="username-field"
+                    class="field__label"
                 >
-                    <label
-                        for="username-field"
-                        class="field__label"
-                    >
-                        {"Логин"}
-                    </label>
+                    {"Логин"}
+                </label>
 
-                    <input
-                        class="field__input"
-                        type="text"
-                        id="username-field"
-                        value={username}
-                        oninput={on_username_input}
-                    />
-                </div>
+                <input
+                    class="field__input"
+                    type="text"
+                    id="username-field"
+                    value={(*username).clone()}
+                    oninput={on_username_input}
+                />
+            </div>
 
-                <div
-                    class="form__field field"
+            <div
+                class="form__field field"
+            >
+                <label
+                    for="password-field"
+                    class="field__label"
                 >
-                    <label
-                        for="password-field"
-                        class="field__label"
-                    >
-                        {"Password"}
-                    </label>
+                    {"Password"}
+                </label>
 
-                    <input
-                        id="password-field"
-                        class="field__input"
-                        type="password"
-                        value={password}
-                        oninput={on_password_input}
-                    />
-                </div>
+                <input
+                    id="password-field"
+                    class="field__input"
+                    type="password"
+                    value={(*password).clone()}
+                    oninput={on_password_input}
+                />
+            </div>
 
-                <button
-                    class="form__button button"
-                    type="submit"
-                >
-                    {"Зарегистрироваться"}
-                </button>
-            </form>
-        }
+            <button
+                class="form__button button"
+                type="submit"
+            >
+                {"Отправить"}
+            </button>
+        </form>
     }
 }
