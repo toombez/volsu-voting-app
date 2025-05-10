@@ -1,4 +1,5 @@
 use axum::{extract::{Path, State}, http::StatusCode, response::IntoResponse, Extension, Json};
+use types::dto::response::VotePayload;
 use uuid::Uuid;
 
 use crate::{app_state::AppState, repository::user_repository::GetUserQuery, utils::get_internal_error_response};
@@ -31,6 +32,6 @@ pub async fn user_vote(
 
     (
         StatusCode::CREATED,
-        Json(voting)
+        Json(VotePayload::new(&voting))
     ).into_response()
 }
