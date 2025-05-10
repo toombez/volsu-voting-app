@@ -1,46 +1,69 @@
-use gloo::net::http::Request;
-use wasm_bindgen::JsCast;
+use std::ops::DerefMut;
+
 use yew::prelude::*;
-use yew_frontend::{client::Client, components::forms::credentials_form::CredentialsForm, state::app_state::AppState};
+use yew_frontend::{client::Client, state::app_state::AppState, utils::get_token};
 use yew_router::prelude::*;
 
-use yew_frontend::{layout::header::Header, pages::profile::GetUserResponse, providers::user_provider::User, router::{main_route::MainRoute, main_switch::main_switch}};
-use yewdux::Dispatch;
+use yew_frontend::{layout::header::Header, router::{main_route::MainRoute, main_switch::main_switch}};
 
 use yew_frontend::providers::client_provider::ClientProvider;
+use yewdux::use_store;
 
-pub struct App;
+#[function_component]
+pub fn App() -> Html {
+    let client = Client::default();
 
-impl Component for App {
-    type Message = ();
-    type Properties = ();
+    let client_provider = ClientProvider {
+        client: client.clone(),
+    };
 
-    fn create(ctx: &Context<Self>) -> Self {
-        Self
-    }
+    let (_, dispatch) = use_store::<AppState>();
 
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        let cx = yewdux::Context::new();
-        let dispatch = Dispatch::<AppState>::new(&cx);
+    use_effect({
+        let client = client.clone();
+        let dispatch = dispatch.clone();
 
-        let user = dispatch.get().auth_user.clone();
+        move || {
+            let token = get_token();
 
-        let client_provider = ClientProvider {
-            client: Client::default(),
-        };
+            match token {
+                Some(token) => {
+                    wasm_bindgen_futures::spawn_local({
+                        let client = client.clone();
+                        let dispatch = dispatch.clone();
 
-        html! {
-            <>
-                <ContextProvider<ClientProvider> context={client_provider.clone()}>
-                    <BrowserRouter>
-                        <Header />
+                        async move {
+                            let response = client
+                                .me(token)
+                                .await;
 
-                        <main>
-                            <Switch<MainRoute> render={main_switch}  />
-                        </main>
-                    </BrowserRouter>
-                </ContextProvider<ClientProvider>>
-            </>
+                            let response = match response {
+                                Err(()) => return,
+                                Ok(user) => user,
+                            };
+
+                            dispatch.reduce_mut(|state| state.auth_user = Some(response.data));
+                        }
+                    });
+
+                    || {}
+                },
+                None => || {},
+            };
         }
+    });
+
+    html! {
+        <>
+            <ContextProvider<ClientProvider> context={client_provider.clone()}>
+                <BrowserRouter>
+                    <Header />
+
+                    <main>
+                        <Switch<MainRoute> render={main_switch}  />
+                    </main>
+                </BrowserRouter>
+            </ContextProvider<ClientProvider>>
+        </>
     }
 }
